@@ -1,6 +1,5 @@
-from ECS.Components.Component import *
-from ECS.Components.Coordinate import *
-from ECS.Components.Scale import *
+from .Component import Component
+from Properties import Scale, Coordinate
 
 class Transform(Component):
     def __init__(self, 
