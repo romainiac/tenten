@@ -62,7 +62,6 @@ class InputSystem(System):
                     in_x = transform.position.x + shape.x_offset <= self.mouse_x <= transform.position.x + shape.x_offset + transform.scale.x
                     in_y = transform.position.y + shape.y_offset <= self.mouse_y <= transform.position.y + shape.y_offset + transform.scale.y
                     is_colliding = in_x and in_y
-                    print(is_colliding)
                     if is_colliding:
                         break
         return is_colliding

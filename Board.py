@@ -1,0 +1,119 @@
+import pygame
+from Properties import Color
+from Cell import Cell
+from typing import Iterable
+from Piece import Piece
+
+class Board:
+
+    def __init__(self, screen, position_x, position_y, cell_size, color: Color = Color.BLACK):
+        self.screen = screen
+        self.position_x = position_x
+        self.position_y = position_y
+        self.rows = []
+        self.cell_size = cell_size
+        self.color = color
+
+    def add_row(self, row: Iterable[Cell]):
+        i = len(self.rows)
+        y1 = self.position_y + (i * self.cell_size)
+        y2 = y1 + self.cell_size
+        for j, cell in enumerate(row):
+            x1 = self.position_x + (j * self.cell_size)
+            x2 = x1 + self.cell_size
+            cell.update_location(x1,y1,x2,y2)
+        self.rows.append(row)
+
+
+    def _find_place(self, piece: Piece):
+        for i, row in enumerate(self.rows):
+            for j, cell in enumerate(row):
+                valid = self._can_place(i,j, piece)
+                if valid:
+                    return (i,j)
+
+    def place(self, piece: Piece):
+        found_pos = self._find_place(piece)
+        if found_pos:
+            for row_idx, piece_row in enumerate(piece.positions):
+                print(piece.positions)
+                next_place = (found_pos[0] + piece_row[0],found_pos[1]+ piece_row[1])
+                print(next_place)
+                to_change = self.rows[next_place[1]][next_place[0]]
+                to_change.color = piece.color
+                to_change.filled = True
+
+    def _can_place(self, pos_x, pos_y, piece: Piece):
+        for place in piece.positions:
+            x = place[0] + pos_x
+            y = place[1] + pos_y
+            if x >= len(self.rows):
+                return False
+            if y >= len(self.rows[x]):
+                return False
+            if self.rows[y][x].filled:
+                return False
+        return True
+
+    def handle_click(self, mouse_pos_x, mouse_pos_y):
+        for i, row in enumerate(self.rows):
+            for j, cell in enumerate(row):
+                if self.is_mouse_colliding(cell, mouse_pos_x, mouse_pos_y):
+                    pass
+                    #cell.color = Color.BLACK
+
+    def is_mouse_colliding(self, cell: Cell, mouse_x, mouse_y):
+        return cell.x1 <= mouse_x <= cell.x2 and cell.y1 <= mouse_y <= cell.y2
+
+    def draw(self):
+        for i, row in enumerate(self.rows):
+            for j, cell in enumerate(row):
+                cell_position_x = self.position_x + (j * self.cell_size)
+                cell_position_y = self.position_y + (i * self.cell_size)
+                pygame.draw.rect(self.screen, cell.color.value, (cell_position_x, cell_position_y, self.cell_size, self.cell_size))
+            self._draw_horizontal_lines()
+            self._draw_vertical_lines()
+            #self._draw_coordinates()
+
+    def _draw_coordinates(self):
+        font=pygame.font.SysFont('timesnewroman',  30)
+        for i, row in enumerate(self.rows):
+            for j, cell in enumerate(row):
+                text_surface = font.render(str(i + j), True, Color.BLACK.value)  # Render text with black color
+                text_rect = text_surface.get_rect(center=((cell.x1 + cell.x2)/2, (cell.y1 + cell.y2) / 2))  # Center the text
+                self.screen.blit(text_surface, text_rect)  # Draw the text on the screen
+                
+    def _draw_horizontal_lines(self):
+        col_count = 0
+        row_count = len(self.rows)
+        if row_count > 0:
+            col_count = len(self.rows[0])
+        for i in range(0, row_count + 1):
+            line_length = col_count * self.cell_size
+            x1 = self.position_x
+            x2 = x1 + line_length
+            y1 = self.position_y + (i * self.cell_size)
+            y2 = y1
+            pygame.draw.line(self.screen, self.color.value, (x1,y1), (x2,y2))
+
+        for i, row in enumerate(self.rows):
+            line_length = len(row) * self.cell_size
+            x1 = self.position_x
+            x2 = x1 + line_length
+            y1 = self.position_y + (i * self.cell_size)
+            y2 = y1
+            pygame.draw.line(self.screen, self.color.value, (x1,y1), (x2,y2))
+
+    def _draw_vertical_lines(self):
+        col_count = 0
+        row_count = len(self.rows)
+        if row_count > 0:
+            col_count = len(self.rows[0])
+        for i in range(0, col_count + 1):
+            line_length = row_count * self.cell_size
+            x1 = self.position_x + (i * self.cell_size)
+            x2 = x1
+            y1 = self.position_y
+            y2 = y1 + line_length
+            pygame.draw.line(self.screen, self.color.value, (x1,y1), (x2,y2))
+        
