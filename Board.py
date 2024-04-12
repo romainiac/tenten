@@ -2,12 +2,14 @@ import pygame
 from Properties import Color
 from Cell import Cell
 from typing import Iterable
+import time
 from Piece import Piece
 
 class Board:
 
     def __init__(self, screen, position_x, position_y, cell_size, color: Color = Color.BLACK):
         self.screen = screen
+        self.clearing = False
         self.position_x = position_x
         self.position_y = position_y
         self.rows = []
@@ -33,15 +35,55 @@ class Board:
                     return (i,j)
 
     def place(self, piece: Piece):
-        found_pos = self._find_place(piece)
-        if found_pos:
-            for row_idx, piece_row in enumerate(piece.positions):
-                print(piece.positions)
-                next_place = (found_pos[0] + piece_row[0],found_pos[1]+ piece_row[1])
-                print(next_place)
-                to_change = self.rows[next_place[1]][next_place[0]]
-                to_change.color = piece.color
-                to_change.filled = True
+        if not self.clearing:
+            found_pos = self._find_place(piece)
+            if found_pos:
+                for row_idx, piece_row in enumerate(piece.positions):
+                    next_place = (found_pos[0] + piece_row[0],found_pos[1]+ piece_row[1])
+                    to_change = self.rows[next_place[0]][next_place[1]]
+                    to_change.color = piece.color
+                    to_change.filled = True
+        else:
+            print("wait to clear")
+
+    def _clear_rows(self):
+        need_to_clear = False
+
+        # mark rows to clear
+        for i, row in enumerate(self.rows):
+            filled = True
+            for j, cell in enumerate(row):
+                if not cell.filled:
+                    filled = False
+            if filled:
+                for j, cell in enumerate(row):
+                    cell.clear = True
+                    cell.clear_time = j * 2
+
+        # mark columns to clear
+        for i in range(0, len(self.rows[0])):
+            filled = True
+            for j in range(0, len(self.rows)):
+                cell = self.rows[j][i]
+                if not cell.filled:
+                    filled = False
+            if filled:
+                for j in range(0, len(self.rows)):
+                    cell = self.rows[j][i]
+                    cell.clear = True
+                    cell.clear_time = j * 2
+
+        # clear
+        cleared = True
+        for i, row in enumerate(self.rows):
+            for j, cell in enumerate(row):
+                if cell.clear:
+                    cleared = False
+                    if cell.animate_ticks >= cell.clear_time:
+                        cell.reset()
+                    else:
+                        cell.animate_ticks  += 1
+        self.clearing = not cleared
 
     def _can_place(self, pos_x, pos_y, piece: Piece):
         for place in piece.positions:
@@ -51,18 +93,18 @@ class Board:
                 return False
             if y >= len(self.rows[x]):
                 return False
-            if self.rows[y][x].filled:
+            if self.rows[x][y].filled:
                 return False
         return True
 
-    def handle_click(self, mouse_pos_x, mouse_pos_y):
+    def _handle_click(self, mouse_pos_x, mouse_pos_y):
         for i, row in enumerate(self.rows):
             for j, cell in enumerate(row):
-                if self.is_mouse_colliding(cell, mouse_pos_x, mouse_pos_y):
+                if self._is_mouse_colliding(cell, mouse_pos_x, mouse_pos_y):
                     pass
                     #cell.color = Color.BLACK
 
-    def is_mouse_colliding(self, cell: Cell, mouse_x, mouse_y):
+    def _is_mouse_colliding(self, cell: Cell, mouse_x, mouse_y):
         return cell.x1 <= mouse_x <= cell.x2 and cell.y1 <= mouse_y <= cell.y2
 
     def draw(self):
@@ -73,6 +115,7 @@ class Board:
                 pygame.draw.rect(self.screen, cell.color.value, (cell_position_x, cell_position_y, self.cell_size, self.cell_size))
             self._draw_horizontal_lines()
             self._draw_vertical_lines()
+        self._clear_rows()
             #self._draw_coordinates()
 
     def _draw_coordinates(self):

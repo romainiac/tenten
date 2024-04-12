@@ -59,13 +59,13 @@ pieces = [
                 (0,0),
                 (0,1),
                 (0,2),
-                (2,1),
+                (1,2),
                 (2,2)
             ]),
         ]
 
 selected_pieces = []
-board = Board(screen, position_x=70,position_y=10,cell_size=40)
+board = Board(screen, position_x=100,position_y=10,cell_size=40)
 board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cell(), Cell()])
 board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cell(), Cell()])
 board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cell(), Cell()])
@@ -91,14 +91,7 @@ while running:
         while (len(selected_pieces) < 3):
             selected_pieces.append(random.choice(pieces))
 
-        board.draw()
-        # for piece_idx, piece in enumerate(selected_pieces):
-        #     for row_idx, row in enumerate(piece):
-        #         # Loop over each column in the row
-        #         for col_idx, value in enumerate(row):
-        #             if (value != 0):
-        #                 pygame.draw.rect(screen, Color.BLUE.value, (PIECE_SHOW_CENTER[0] + (100 * piece_idx) + (col_idx*BOX_SIZE), PIECE_SHOW_CENTER[1] + (row_idx*BOX_SIZE), BOX_SIZE, BOX_SIZE))
-        #                 print(f"Row: {row_idx}, Column: {col_idx}, Value: {value}")
-  
-        pygame.display.flip()
-        pygame.time.Clock().tick(60)
+    board.draw()
+    pygame.display.update()
+    pygame.display.flip()
+    pygame.time.Clock().tick(60)
