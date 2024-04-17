@@ -1,9 +1,8 @@
-from enum import Enum
-from ECS.Managers import GameManager
+import pygame
+from Components import Grid, Renderer, GameManager
+from Properties import DarkTheme
 
 game_manager = GameManager()
 
-game_manager.start_game()
-while game_manager.is_running():
-    game_manager.update_systems()
-game_manager.destroy()
+while game_manager.running:
+    game_manager.update()

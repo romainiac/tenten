@@ -11,3 +11,4 @@ class Color(Enum):
     LIGHT_GREEN = (144,238,144)
     PURPLE = (147,112,219)
     LIGHT_BLUE = (0,191,255)
+    DARK_BLUE = (44,44,127)
