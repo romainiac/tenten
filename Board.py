@@ -27,28 +27,27 @@ class Board:
         self.rows.append(row)
 
 
-    def _find_place(self, piece: Piece):
+    def find_valid_places(self, piece: Piece):
+        valid_places = []
         for i, row in enumerate(self.rows):
             for j, cell in enumerate(row):
                 valid = self._can_place(i,j, piece)
                 if valid:
-                    return (i,j)
+                    valid_places.append((i,j))
+        return valid_places
 
-    def place(self, piece: Piece):
+    def place(self, piece: Piece, pos):
         if not self.clearing:
-            found_pos = self._find_place(piece)
-            if found_pos:
-                for row_idx, piece_row in enumerate(piece.positions):
-                    next_place = (found_pos[0] + piece_row[0],found_pos[1]+ piece_row[1])
-                    to_change = self.rows[next_place[0]][next_place[1]]
-                    to_change.color = piece.color
-                    to_change.filled = True
+            #found_pos = self._find_place(piece)
+            for row_idx, piece_row in enumerate(piece.positions):
+                next_place = (pos[0] + piece_row[0],pos[1]+ piece_row[1])
+                to_change = self.rows[next_place[0]][next_place[1]]
+                to_change.color = piece.color
+                to_change.filled = True
         else:
             print("wait to clear")
 
     def _clear_rows(self):
-        need_to_clear = False
-
         # mark rows to clear
         for i, row in enumerate(self.rows):
             filled = True

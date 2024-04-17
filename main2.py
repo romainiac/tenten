@@ -65,7 +65,7 @@ pieces = [
         ]
 
 selected_pieces = []
-board = Board(screen, position_x=100,position_y=10,cell_size=40)
+board = Board(screen, position_x=100,position_y=100,cell_size=40)
 board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cell(), Cell()])
 board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cell(), Cell()])
 board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cell(), Cell()])
@@ -77,19 +77,35 @@ board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cel
 board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cell(), Cell()])
 board.add_row([Cell(), Cell(), Cell(),Cell(), Cell(), Cell(),Cell(), Cell(), Cell(), Cell()])
 
+game_lost = False
+font=pygame.font.SysFont('timesnewroman',  30)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x,mouse_y = pygame.mouse.get_pos()
-            if event.button == 1:  # Left mouse button
-                board.place(random.choice(pieces))
+            if not game_lost:
+                mouse_x,mouse_y = pygame.mouse.get_pos()
+                if event.button == 1:  # Left mouse button
+                    piece = random.choice(pieces)
+                    valid_places = board.find_valid_places(piece)
+                    if len(valid_places) == 0:
+                        game_lost = True
+                    else:
+                        place = random.choice(valid_places)
+                        if place:
+                            board.place(piece, place)
+
 
         screen.fill(Color.WHITE.value)
 
-        while (len(selected_pieces) < 3):
-            selected_pieces.append(random.choice(pieces))
+        if game_lost:
+            text_surface = font.render("Game Lost", True, Color.BLACK.value)
+            text_rect = text_surface.get_rect(center=((300, 80)))
+            screen.blit(text_surface, text_rect)
+
+        #while (len(selected_pieces) < 3):
+        #    selected_pieces.append(random.choice(pieces))
 
     board.draw()
     pygame.display.update()
