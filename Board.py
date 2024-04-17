@@ -15,6 +15,7 @@ class Board:
         self.rows = []
         self.cell_size = cell_size
         self.color = color
+        self.score = 0
 
     def add_row(self, row: Iterable[Cell]):
         i = len(self.rows)
@@ -44,6 +45,7 @@ class Board:
                 to_change = self.rows[next_place[0]][next_place[1]]
                 to_change.color = piece.color
                 to_change.filled = True
+                self.score += 1
         else:
             print("wait to clear")
 
@@ -74,14 +76,17 @@ class Board:
 
         # clear
         cleared = True
+        current_score = 0
         for i, row in enumerate(self.rows):
             for j, cell in enumerate(row):
                 if cell.clear:
                     cleared = False
                     if cell.animate_ticks >= cell.clear_time:
+                        current_score += 1
                         cell.reset()
                     else:
                         cell.animate_ticks  += 1
+        self.score += current_score
         self.clearing = not cleared
 
     def _can_place(self, pos_x, pos_y, piece: Piece):
@@ -106,7 +111,7 @@ class Board:
     def _is_mouse_colliding(self, cell: Cell, mouse_x, mouse_y):
         return cell.x1 <= mouse_x <= cell.x2 and cell.y1 <= mouse_y <= cell.y2
 
-    def draw(self):
+    def draw(self, selected_pieces):
         for i, row in enumerate(self.rows):
             for j, cell in enumerate(row):
                 cell_position_x = self.position_x + (j * self.cell_size)
@@ -115,7 +120,18 @@ class Board:
             self._draw_horizontal_lines()
             self._draw_vertical_lines()
         self._clear_rows()
+        self._draw_selected_pieces(selected_pieces)
             #self._draw_coordinates()
+        
+    def _draw_selected_pieces(self, selected_pieces):
+        board_w = self.position_x + (len(self.rows) * self.cell_size)
+        board_h = self.position_y + (len(self.rows[0]) * self.cell_size)
+        for i, piece in enumerate(selected_pieces):
+            for j, coord in enumerate(piece.positions):
+                y,x = coord
+                position_x = self.position_x + (x * self.cell_size / 2) + (i * board_w / 3)
+                position_y = self.position_y  + 500 + (y * self.cell_size / 2)
+                pygame.draw.rect(self.screen, piece.color.value, (position_x, position_y, self.cell_size / 2, self.cell_size / 2))
 
     def _draw_coordinates(self):
         font=pygame.font.SysFont('timesnewroman',  30)
